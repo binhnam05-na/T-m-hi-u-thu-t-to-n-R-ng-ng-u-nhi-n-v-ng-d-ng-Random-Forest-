@@ -74,7 +74,7 @@ except Exception:
     st.error("Không tìm thấy tệp 'all_stocks_5yr.csv'. Vui lòng đặt tệp dữ liệu cùng cấp với mã nguồn ứng dụng.")
     st.stop()
 
-# --- CSS ĐÃ SỬA LỖI: XÓA ĐOẠN ẨN CHỮ DATAFRAME VÀ LÀM RÕ CHỮ TIÊU ĐỀ ---
+# --- CSS ĐỒNG BỘ NỀN VÀ KHẮC PHỤC LỖI HIỂN THỊ DỮ LIỆU BẢNG ---
 st.markdown("""
     <style>
         /* Thiết lập nền tối vừa và ảnh nền chìm nhẹ phía sau */
@@ -95,7 +95,7 @@ st.markdown("""
         /* Cấu hình sidebar chuyên nghiệp */
         section[data-testid="stSidebar"] {
             background-color: #0D1117 !important;
-            border-right: 1px solid #21262D;
+            border-right: 1px solid #30363D;
         }
         section[data-testid="stSidebar"] * {
             color: #C9D1D9 !important;
@@ -242,19 +242,34 @@ with tab1:
         m_col2.metric("MAE (Sai số tuyệt đối)", f"{metrics['MAE']:.4f}")
         m_col3.metric("MSE", f"{metrics['MSE']:.4f}")
 
-# --- TAB 2: ĐỒ THỊ PHÂN TÍCH (ĐÃ SỬA CHỮ VÀ LÀM DỊU MÀU) ---
+# --- TAB 2: ĐỒ THỊ PHÂN TÍCH (ĐÃ HIỆU CHỈNH TOÀN DIỆN CHỮ VÀ PHỐI MÀU) ---
 with tab2:
     st.markdown('<h3 style="color:#26A69A; margin-bottom:20px; font-size:18px; font-weight:bold;">📊 ĐỒ THỊ PHÂN TÍCH KỸ THUẬT VÀ THUẬT TOÁN</h3>', unsafe_allow_html=True)
     
-    # Cấu hình giao diện biểu đồ: Tăng độ sáng tiêu đề lên #FFFFFF và làm sáng rõ lưới dóng trục
+    # Cấu hình giao diện biểu đồ chung - Sửa lỗi khuất chữ tiêu đề & Tăng kích thước chữ của các trục tọa độ
     chart_layout_config = dict(
         template="plotly_dark",
         paper_bgcolor='rgba(13, 17, 23, 0.7)', 
         plot_bgcolor='#0D1117',
         font=dict(color='#C9D1D9'),
-        title_font=dict(color='#FFFFFF', size=16, family='Segoe UI', weight='bold'), # SỬA LỖI MẤT CHỮ TIÊU ĐỀ
-        xaxis=dict(gridcolor='#30363D', showgrid=True, linecolor='#30363D', title_font=dict(color='#8B949E')),
-        yaxis=dict(gridcolor='#30363D', showgrid=True, linecolor='#30363D', title_font=dict(color='#8B949E'))
+        title_font=dict(color='#FFFFFF', size=18, family='Segoe UI', weight='bold'), # Làm sáng rõ tiêu đề lớn
+        
+        # Cấu hình Trục X: Tăng cỡ chữ dóng số lên 13, chữ tiêu đề trục lên 14
+        xaxis=dict(
+            gridcolor='#30363D', 
+            showgrid=True, 
+            linecolor='#30363D', 
+            title_font=dict(color='#8B949E', size=14),
+            tickfont=dict(size=13, color='#C9D1D9')
+        ),
+        # Cấu hình Trục Y: Đảm bảo chữ "Tần suất xuất hiện" và dóng số to rõ nét
+        yaxis=dict(
+            gridcolor='#30363D', 
+            showgrid=True, 
+            linecolor='#30363D', 
+            title_font=dict(color='#8B949E', size=14),
+            tickfont=dict(size=13, color='#C9D1D9')
+        )
     )
 
     # Biểu đồ 1: Biến động giá Line màu Xanh tăng - Đỏ giảm kịch tính
@@ -272,6 +287,7 @@ with tab2:
         color='Importance', color_continuous_scale=['#EF5350', '#F2A900', '#26A69A']
     )
     fig2.update_layout(coloraxis_showscale=False, **chart_layout_config)
+    fig2.update_yaxes(tickfont=dict(size=13)) # Giúp các nhãn Feature to, rõ nét
     st.plotly_chart(fig2, use_container_width=True)
     
     # Biểu đồ 3: So sánh Thực tế vs Dự đoán
@@ -285,34 +301,34 @@ with tab2:
     fig3.update_layout(title=f"Biểu đồ 3: So sánh Giá trị Thực tế vs Dự đoán ({display_length} phiên cuối)", **chart_layout_config)
     st.plotly_chart(fig3, use_container_width=True)
     
-    # Biểu đồ 4: ĐỔI MÀU NHẠT DỊU MẮT, KHÔNG CHÓI (Sử dụng bảng màu Cividis nhẹ nhàng)
+    # Biểu đồ 4: THANG MÀU TURBID - ĐỘ PHẢN QUANG CAO, KHÔNG LO BỊ NHÌN LẦN VÀO NỀN TỐI
     fig4 = px.scatter(
         filtered_df, x='volume', y='close', color='high',
         title="Biểu đồ 4: Mối tương quan giữa Khối lượng giao dịch và Giá đóng cửa",
         labels={'volume': 'Khối lượng khớp', 'close': 'Giá khớp', 'high': 'Giá cao nhất'},
-        color_continuous_scale='Cividis' # Đổi sang hệ màu Cividis nhạt, trung tính và vô cùng dễ nhìn
+        color_continuous_scale='Turbid' # Thang màu tương phản mạnh giúp định vị điểm chấm siêu rõ, không bị phán đoán sai
     )
     fig4.update_layout(**chart_layout_config)
     st.plotly_chart(fig4, use_container_width=True)
     
-    # Biểu đồ 5: THÊM DẤU GẠCH XUỐNG (GRIDLINES DỌC) ĐỂ DỄ NHÌN DÓNG TRỤC
+    # Biểu đồ 5: ĐỔI MÀU XANH NGỌC ĐỒNG BỘ + BẬT GRIDLINE DỌC SẮC NÉT
     filtered_df['Price_Range'] = filtered_df['high'] - filtered_df['low']
     fig5 = px.histogram(
         filtered_df, x='Price_Range', 
         title="Biểu đồ 5: Phân phối Biên độ dao động giá trong ngày (High - Low)",
-        labels={'Price_Range': 'Biên độ dao động (USD)'},
-        color_discrete_sequence=['#8884d8'], nbins=50
+        labels={'Price_Range': 'Biên độ dao động (USD)', 'count': 'Tần suất xuất hiện'},
+        color_discrete_sequence=['#26A69A'], # Tông xanh ngọc khớp đồng bộ với toàn hệ thống
+        nbins=50
     )
     fig5.update_layout(yaxis_title="Tần suất xuất hiện", **chart_layout_config)
-    # Ép thuộc tính hiển thị đường lưới dọc thật rõ nét
-    fig5.update_xaxes(showgrid=True, gridcolor='#30363D', gridwidth=1)
+    # Ép hiển thị các đường gạch dọc xuống trục hoành để dóng biên độ giá dễ dàng
+    fig5.update_xaxes(showgrid=True, gridcolor='#30363D', gridwidth=1.5)
     st.plotly_chart(fig5, use_container_width=True)
 
-# --- TAB 3: HIỂN THỊ DỮ LIỆU SÁNG RÕ 100% ---
+# --- TAB 3: HIỂN THỊ DỮ LIỆU SÁNG RÕ CHỮ TRẮNG NỀN TỐI ---
 with tab3:
     st.markdown(f'<h3 style="color:#F2A900; font-weight:bold;">📋 10 DÒNG DỮ LIỆU ĐẦU TIÊN CỦA KHOẢNG THỜI GIAN ĐÃ CHỌN ({selected_ticker})</h3>', unsafe_allow_html=True)
-    
-    # Đã giải quyết triệt để lỗi mất dữ liệu: Streamlit tự động áp dụng Darkmode sáng rõ chữ trắng nền đen mờ
+    # Streamlit tự động hiển thị bảng rõ chữ, sáng đẹp trên nền Darkmode
     st.dataframe(filtered_df.head(10), use_container_width=True)
     
     st.markdown('<h3 style="color:#F2A900; margin-top:30px; font-weight:bold;">📊 Thống kê mô tả tổng quan trong khoảng thời gian này</h3>', unsafe_allow_html=True)
