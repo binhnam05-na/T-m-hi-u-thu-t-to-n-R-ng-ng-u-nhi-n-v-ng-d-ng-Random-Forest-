@@ -54,10 +54,15 @@ def train_rf_model(df, ticker, start_date, end_date, n_estimators, max_depth, mi
     rf.fit(X_train, y_train)
     
     y_pred = rf.predict(X_test)
+    
+    mape = np.mean(np.abs((y_test - y_pred) / y_test))
+    accuracy = (1 - mape) * 100
+    
     metrics = {
         "MAE": mean_absolute_error(y_test, y_pred),
         "MSE": mean_squared_error(y_test, y_pred),
-        "R2": r2_score(y_test, y_pred)
+        "R2": r2_score(y_test, y_pred),
+        "Accuracy": accuracy
     }
     
     importance_df = pd.DataFrame({
@@ -109,6 +114,45 @@ rf_model, metrics, importance_df, y_test, y_pred, filtered_df = train_rf_model(
 st.markdown(f'<h1 style="text-align:center; color:#0F172A; font-weight:800; margin-bottom:20px;">📈 HỆ THỐNG DỰ BÁO GIÁ CỔ PHIẾU S&P 500</h1>', unsafe_allow_html=True)
 st.markdown(f'<p style="text-align:center; font-size:18px; color:#475569;">Phân tích và dự báo mã cổ phiếu: <strong style="color:#2563EB;">{selected_ticker}</strong> trong giai đoạn từ <strong style="color:#10B981;">{start_date}</strong> đến <strong style="color:#10B981;">{end_date}</strong></p>', unsafe_allow_html=True)
 
+st.markdown(
+    """
+    <style>
+    div[data-testid="stTabContent"] {
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        border-radius: 12px;
+        padding: 25px !important;
+        margin-top: 15px;
+        position: relative;
+    }
+    div[data-testid="stTabContent"]:nth-of-type(1) {
+        background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), 
+                    url("https://images.pexels.com/photos/30915372/pexels-photo-30915372.jpeg") !important;
+        background-size: cover !important;
+        background-position: center !important;
+    }
+    div[data-testid="stTabContent"]:nth-of-type(2) {
+        background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
+                    url("https://images.pexels.com/photos/6772076/pexels-photo-6772076.jpeg") !important;
+        background-size: cover !important;
+        background-position: center !important;
+    }
+    div[data-testid="stTabContent"]:nth-of-type(3) {
+        background: linear-gradient(rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.90)), 
+                    url("https://vietmytravel.com/wp-content/uploads/2019/11/pho-wall-new-york.jpg") !important;
+        background-size: cover !important;
+        background-position: center !important;
+    }
+    div[data-testid="stTabContent"] h3 {
+        color: #1E3A8A !important;
+        font-weight: 700 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 if rf_model is None:
     st.error("⚠️ Không đủ dữ liệu trong khoảng thời gian đã chọn để huấn luyện mô hình. Vui lòng mở rộng khoảng thời gian ở thanh bên (Sidebar).")
     st.stop()
@@ -125,7 +169,7 @@ with tab1:
         
         latest_row = filtered_df.iloc[-1]
         
-        open_val = st.number_input("Giá mở cửa phiên trước (open)", value=float(latest_row['open']), format="%.2f")
+        open_val = st.number_input("Giá mở cửa phiền trước (open)", value=float(latest_row['open']), format="%.2f")
         high_val = st.number_input("Giá cao nhất phiên trước (high)", value=float(latest_row['high']), format="%.2f")
         low_val = st.number_input("Giá thấp nhất phiên trước (low)", value=float(latest_row['low']), format="%.2f")
         close_val = st.number_input("Giá đóng cửa phiên trước (close)", value=float(latest_row['close']), format="%.2f")
@@ -153,10 +197,11 @@ with tab1:
             st.markdown("---")
             
         st.markdown('<p style="font-weight:600; color:#475569; margin-bottom:5px;">Chỉ số đánh giá độ chính xác trong khoảng thời gian này:</p>', unsafe_allow_html=True)
-        m_col1, m_col2, m_col3 = st.columns(3)
-        m_col1.metric("R² Score (Độ chuẩn xác)", f"{metrics['R2']:.4f}")
-        m_col2.metric("MAE (Sai số tuyệt đối)", f"{metrics['MAE']:.4f}")
-        m_col3.metric("MSE (Sai số bình phương)", f"{metrics['MSE']:.4f}")
+        m_col1, m_col2, m_col3, m_col4 = st.columns(4)
+        m_col1.metric("Accuracy (Tỷ lệ)", f"{metrics['Accuracy']:.2f}%")
+        m_col2.metric("R² Score (Độ chuẩn)", f"{metrics['R2']:.4f}")
+        m_col3.metric("MAE (Tuyệt đối)", f"{metrics['MAE']:.4f}")
+        m_col4.metric("MSE (Bình phương)", f"{metrics['MSE']:.4f}")
 
 with tab2:
     st.markdown('<h3 style="color:#1E293B; margin-bottom:20px;">📉 HỆ THỐNG 5 BIỂU ĐỒ TRỰC QUAN HÓA CAO CẤP</h3>', unsafe_allow_html=True)
