@@ -141,7 +141,7 @@ st.markdown(
     }
     div[data-testid="stTabContent"]:nth-of-type(3) {
         background: linear-gradient(rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.90)), 
-                    url("https://vietmytravel.com/wp-content/uploads/2019/11/pho-wall-new-york.jpg") !important;
+                    url("https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/NYSE127.jpg/330px-NYSE127.jpg") !important;
         background-size: cover !important;
         background-position: center !important;
     }
