@@ -113,9 +113,52 @@ if rf_model is None:
     st.error("⚠️ Không đủ dữ liệu trong khoảng thời gian đã chọn để huấn luyện mô hình. Vui lòng mở rộng khoảng thời gian ở thanh bên (Sidebar).")
     st.stop()
 
+# Định nghĩa các tab
 tab1, tab2, tab3 = st.tabs(["🔮 Dự báo & Kết quả", "📊 Trực quan hóa dữ liệu", "📋 Dữ liệu mẫu (Top 10)"])
 
+# --- CẤU HÌNH CSS CHUNG CHO CÁC KHỐI TAB CONTAINER TRÊN STREAMLIT ---
+st.markdown("""
+    <style>
+        /* Định dạng chung cho phần chứa nội dung mỗi Tab để hiển thị ảnh nền */
+        .tab-box-bg {
+            padding: 30px;
+            border-radius: 15px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        /* Tạo một lớp phủ mờ phía trên ảnh nền giúp text/biểu đồ dễ nhìn hơn, không bị lóa */
+        .tab-box-bg::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 15px;
+            z-index: 1;
+        }
+        /* Đưa toàn bộ nội dung thật lên trên lớp phủ nền */
+        .tab-box-content {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
 with tab1:
+    # Tích hợp ảnh nền số 1 (Lớp phủ trắng mờ 85% để nhìn rõ form nhập liệu)
+    st.markdown("""
+        <style>
+            .bg-tab1 {
+                background-image: url('https://images.pexels.com/photos/30915372/pexels-photo-30915372.jpeg?_gl=1*1l16bn4*_ga*MTYxOTc0NDI5NS4xNzgxNzYzMzU3*_ga_8JE65Q40S6*czE3ODE3NjMzNTYkbzEkZzEkdDE3ODE3NjMzNjYkajUwJGwwJGgw');
+            }
+            .bg-tab1::before { background: rgba(255, 255, 255, 0.85); }
+        </style>
+        <div class="tab-box-bg bg-tab1"><div class="tab-box-content">
+    """, unsafe_allow_html=True)
+
     col_input, col_output = st.columns([1, 1], gap="large")
     
     with col_input:
@@ -158,7 +201,20 @@ with tab1:
         m_col2.metric("MAE (Sai số tuyệt đối)", f"{metrics['MAE']:.4f}")
         m_col3.metric("MSE (Sai số bình phương)", f"{metrics['MSE']:.4f}")
 
+    st.markdown('</div></div>', unsafe_allow_html=True) # Đóng div bọc background tab 1
+
 with tab2:
+    # Tích hợp ảnh nền số 2 (Lớp phủ trắng mờ nhẹ 90% vì chứa nhiều biểu đồ đồ họa màu sắc)
+    st.markdown("""
+        <style>
+            .bg-tab2 {
+                background-image: url('https://images.pexels.com/photos/6772076/pexels-photo-6772076.jpeg?_gl=1*1jtuazw*_ga*MTYxOTc0NDI5NS4xNzgxNzYzMzU3*_ga_8JE65Q40S6*czE3ODE3NjMzNTYkbzEkZzEkdDE3ODE3NjM0MDYkajEwJGwwJGgw');
+            }
+            .bg-tab2::before { background: rgba(255, 255, 255, 0.90); }
+        </style>
+        <div class="tab-box-bg bg-tab2"><div class="tab-box-content">
+    """, unsafe_allow_html=True)
+
     st.markdown('<h3 style="color:#1E293B; margin-bottom:20px;">📉 HỆ THỐNG 5 BIỂU ĐỒ TRỰC QUAN HÓA CAO CẤP</h3>', unsafe_allow_html=True)
     
     fig1 = object_graph.Figure()
@@ -213,9 +269,24 @@ with tab2:
     fig5.update_layout(template='simple_white', yaxis_title="Tần suất xuất hiện")
     st.plotly_chart(fig5, use_container_width=True)
 
+    st.markdown('</div></div>', unsafe_allow_html=True) # Đóng div bọc background tab 2
+
 with tab3:
+    # Tích hợp ảnh nền số 3 (Lớp phủ trắng mờ dày 92% vì hiển thị bảng dữ liệu Dataframe gốc)
+    st.markdown("""
+        <style>
+            .bg-tab3 {
+                background-image: url('https://cdn.vietnambiz.vn/2019/11/21/947c8cad98ec71b228fd-15743030298821491913597.jpg');
+            }
+            .bg-tab3::before { background: rgba(255, 255, 255, 0.92); }
+        </style>
+        <div class="tab-box-bg bg-tab3"><div class="tab-box-content">
+    """, unsafe_allow_html=True)
+
     st.markdown(f'<h3 style="color:#1E293B;">📋 10 DÒNG DỮ LIỆU ĐẦU TIÊN CỦA KHOẢNG THỜI GIAN ĐÃ CHỌN ({selected_ticker})</h3>', unsafe_allow_html=True)
     st.dataframe(filtered_df.head(10), use_container_width=True)
     
     st.markdown('<h3 style="color:#1E293B; margin-top:30px;">📊 Thống kê mô tả tổng quan trong khoảng thời gian này</h3>', unsafe_allow_html=True)
     st.dataframe(filtered_df.describe(), use_container_width=True)
+
+    st.markdown('</div></div>', unsafe_allow_html=True) # Đóng div bọc background tab 3
