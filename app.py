@@ -74,84 +74,75 @@ except Exception:
     st.error("Không tìm thấy tệp 'all_stocks_5yr.csv'. Vui lòng đặt tệp dữ liệu cùng cấp với mã nguồn ứng dụng.")
     st.stop()
 
-# --- CSS ĐỒNG BỘ NỀN TỐI VỪA (DARK SATIN) & SỬA LỖI HIỂN THỊ DỮ LIỆU ---
+# --- CSS ĐÃ SỬA LỖI: XÓA ĐOẠN ẨN CHỮ DATAFRAME VÀ LÀM RÕ CHỮ TIÊU ĐỀ ---
 st.markdown("""
     <style>
-        /* Thiết lập hình nền chung cho toàn bộ ứng dụng kèm lớp phủ mờ tinh tế */
+        /* Thiết lập nền tối vừa và ảnh nền chìm nhẹ phía sau */
         .stApp {
-            background-image: linear-gradient(rgba(11, 14, 20, 0.88), rgba(11, 14, 20, 0.92)), 
+            background-image: linear-gradient(rgba(13, 17, 23, 0.90), rgba(13, 17, 23, 0.93)), 
                               url('https://images.pexels.com/photos/30915372/pexels-photo-30915372.jpeg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
         
-        /* Đồng bộ chữ trắng xám có độ tương phản cao, dễ đọc */
-        .stApp, .stApp p, .stApp span, .stApp label, .stApp h1, .stApp h2, .stApp h3 {
-            color: #E2E8F0 !important;
+        /* Màu chữ hiển thị cơ bản của hệ thống */
+        .stApp p, .stApp span, .stApp label, .stApp h1, .stApp h2, .stApp h3 {
+            color: #F0F4F8 !important;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Cấu hình Sidebar màu đen xám của bảng giá */
+        /* Cấu hình sidebar chuyên nghiệp */
         section[data-testid="stSidebar"] {
-            background-color: #0B0E14 !important;
-            border-right: 1px solid #1E293B;
+            background-color: #0D1117 !important;
+            border-right: 1px solid #21262D;
         }
         section[data-testid="stSidebar"] * {
-            color: #94A3B8 !important;
+            color: #C9D1D9 !important;
         }
 
-        /* Các khối bao bọc nội dung (Container) */
+        /* Container bao bọc các khối dữ liệu */
         div[data-testid="stBlock"] {
-            background-color: rgba(20, 26, 38, 0.8) !important;
+            background-color: rgba(22, 27, 34, 0.85) !important;
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid #2D3748;
+            border: 1px solid #30363D;
         }
         
-        /* Menu Tab sàn chứng khoán */
+        /* Thiết kế các tab HOSE/iBoard */
         button[data-baseweb="tab"] {
-            color: #94A3B8 !important;
-            background-color: #0F172A !important;
-            border-radius: 4px 4px 0 0;
-            margin-right: 4px;
-            padding: 8px 16px !important;
-            border: 1px solid #1E293B !important;
+            color: #8B949E !important;
+            background-color: #161B22 !important;
+            border-radius: 6px 6px 0 0;
+            margin-right: 6px;
+            padding: 10px 20px !important;
+            border: 1px solid #30363D !important;
         }
         button[data-baseweb="tab"][aria-selected="true"] {
-            background-color: #1E293B !important;
-            color: #00E676 !important; 
+            background-color: #21262D !important;
+            color: #26A69A !important; 
             font-weight: bold !important;
-            border-bottom: 2px solid #00E676 !important;
+            border-bottom: 3px solid #26A69A !important;
         }
         
-        /* GIẢI QUYẾT LỖI MẤT DỮ LIỆU TAB 3: Giúp bảng rõ nét tuyệt đối */
-        .stDataFrame div {
-            background-color: #0F172A !important;
-        }
-        .stDataFrame td, .stDataFrame th, .stDataFrame span {
-            color: #F8FAFC !important;
-            text-shadow: none !important;
-        }
-        
-        /* Tinh chỉnh ô nhập liệu */
+        /* Ô nhập số */
         input {
             color: #FFFFFF !important;
-            background-color: #0B0E14 !important;
-            border: 1px solid #2A3142 !important;
+            background-color: #0D1117 !important;
+            border: 1px solid #30363D !important;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Thanh sidebar cấu hình thuật toán
-st.sidebar.markdown('<h2 style="color:#EAB308; font-weight:bold;">🛠️ CẤU HÌNH RANDOM FOREST</h2>', unsafe_allow_html=True)
+# Giao diện Sidebar thanh công cụ
+st.sidebar.markdown('<h2 style="color:#F2A900; font-weight:bold;">🛠️ CẤU HÌNH RANDOM FOREST</h2>', unsafe_allow_html=True)
 selected_ticker = st.sidebar.selectbox("Chọn mã cổ phiếu S&P 500", tickers, index=tickers.index('AAL') if 'AAL' in tickers else 0)
 
 ticker_full_data = df[df['Name'] == selected_ticker].sort_values('date')
 min_date = ticker_full_data['date'].min().date()
 max_date = ticker_full_data['date'].max().date()
 
-st.sidebar.markdown('<h3 style="color:#94A3B8; font-weight:600; margin-top:15px;">📅 LỌC KHOẢNG THỜI GIAN</h3>', unsafe_allow_html=True)
+st.sidebar.markdown('<h3 style="color:#8B949E; font-weight:600; margin-top:15px;">📅 LỌC KHOẢNG THỜI GIAN</h3>', unsafe_allow_html=True)
 date_range = st.sidebar.date_input(
     "Chọn khoảng thời gian phân tích",
     value=(min_date, max_date),
@@ -175,9 +166,9 @@ rf_model, metrics, importance_df, y_test, y_pred, filtered_df = train_rf_model(
     df, selected_ticker, start_date, end_date, n_estimators, max_depth, min_samples_split
 )
 
-# Khu vực Header chính giữa
+# Khối Header chính giữa trang
 st.markdown(f'<h1 style="text-align:center; color:#FFFFFF; font-weight:800; margin-bottom:5px; text-shadow: 2px 2px 4px #000000;">📈 HỆ THỐNG DỰ BÁO GIÁ CỔ PHIẾU S&P 500</h1>', unsafe_allow_html=True)
-st.markdown(f'<p style="text-align:center; font-size:16px; color:#94A3B8; margin-bottom:25px;">Mã phân tích: <strong style="color:#EAB308;">{selected_ticker}</strong> | Tiến trình giai đoạn: <strong style="color:#00E676;">{start_date}</strong> đến <strong style="color:#00E676;">{end_date}</strong></p>', unsafe_allow_html=True)
+st.markdown(f'<p style="text-align:center; font-size:16px; color:#8B949E; margin-bottom:25px;">Phân tích mã: <strong style="color:#F2A900;">{selected_ticker}</strong> | Khung thời gian: <strong style="color:#26A69A;">{start_date}</strong> đến <strong style="color:#26A69A;">{end_date}</strong></p>', unsafe_allow_html=True)
 
 if rf_model is None:
     st.error("⚠️ Không đủ dữ liệu trong khoảng thời gian đã chọn để huấn luyện mô hình. Vui lòng mở rộng khoảng thời gian ở thanh bên (Sidebar).")
@@ -185,13 +176,13 @@ if rf_model is None:
 
 tab1, tab2, tab3 = st.tabs(["🔮 Dự báo & Kết quả", "📊 Trực quan hóa dữ liệu", "📋 Dữ liệu mẫu (Top 10)"])
 
-# --- TAB 1: DỰ BÁO VÀ CHỈ BÁO MÀU SẮC RỰC RỠ ---
+# --- TAB 1: DỰ BÁO KẾT QUẢ ---
 with tab1:
     col_input, col_output = st.columns([1, 1], gap="large")
     
     with col_input:
-        st.markdown('<div style="background-color:#141A26; padding:15px; border-radius:6px; border-left: 5px solid #EAB308;">'
-                    '<h3 style="margin-top:0; color:#EAB308; font-size:16px; font-weight:bold;">📥 NHẬP THÔNG SỐ ĐẦU VÀO (PHIÊN T-1)</h3>'
+        st.markdown('<div style="background-color:#161B22; padding:15px; border-radius:6px; border-left: 5px solid #F2A900;">'
+                    '<h3 style="margin-top:0; color:#F2A900; font-size:16px; font-weight:bold;">📥 NHẬP THÔNG SỐ ĐẦU VÀO (PHIÊN T-1)</h3>'
                     '</div><br>', unsafe_allow_html=True)
         
         latest_row = filtered_df.iloc[-1]
@@ -201,11 +192,11 @@ with tab1:
         close_val = st.number_input("Giá đóng cửa phiên trước (close)", value=float(latest_row['close']), format="%.2f")
         volume_val = st.number_input("Khối lượng giao dịch phiên trước (volume)", value=int(latest_row['volume']), step=1000)
         
-        predict_clicked = st.button("🚀 Thực hiện tính toán dự báo giá", use_container_width=True)
+        predict_clicked = st.button("🚀 Bắt đầu dự đoán giá", use_container_width=True)
         
     with col_output:
-        st.markdown('<div style="background-color:#141A26; padding:15px; border-radius:6px; border-left: 5px solid #00E676;">'
-                    '<h3 style="margin-top:0; color:#00E676; font-size:16px; font-weight:bold;">📤 KẾT QUẢ ĐẦU RA TỪ MÔ HÌNH DỰ BÁO</h3>'
+        st.markdown('<div style="background-color:#161B22; padding:15px; border-radius:6px; border-left: 5px solid #26A69A;">'
+                    '<h3 style="margin-top:0; color:#26A69A; font-size:16px; font-weight:bold;">📤 KẾT QUẢ ĐẦU RA TỪ MÔ HÌNH DỰ BÁO</h3>'
                     '</div><br>', unsafe_allow_html=True)
         
         if predict_clicked:
@@ -214,76 +205,76 @@ with tab1:
             price_diff = prediction - close_val
             pct_diff = (price_diff / close_val) * 100
             
-            # ĐỘC QUYỀN LOGIC MÀU SẮC: Xanh tăng rực - Đỏ giảm đậm chất sàn HOSE
+            # CẤU HÌNH CHỈ BÁO XANH TĂNG ĐỎ GIẢM SIÊU RỰC RỠ
             if price_diff > 0:
-                box_bg = "rgba(0, 230, 118, 0.15)"
-                border_c = "#00E676"
-                text_c = "#00E676"
+                box_bg = "rgba(38, 166, 154, 0.15)"
+                border_c = "#26A69A"
+                text_c = "#00E676"  # Xanh Neon sáng rực rỡ
                 status_text = f"▲ Tăng {price_diff:+.2f} ({pct_diff:+.2f}%)"
             elif price_diff < 0:
-                box_bg = "rgba(255, 23, 68, 0.15)"
-                border_c = "#FF1744"
-                text_c = "#FF1744"
+                box_bg = "rgba(239, 83, 80, 0.15)"
+                border_c = "#EF5350"
+                text_c = "#FF1744"  # Đỏ Neon đậm chất sàn
                 status_text = f"▼ Giảm {price_diff:+.2f} ({pct_diff:+.2f}%)"
             else:
-                box_bg = "rgba(254, 240, 138, 0.1)"
-                border_c = "#EAB308"
-                text_c = "#EAB308"
+                box_bg = "rgba(242, 169, 0, 0.1)"
+                border_c = "#F2A900"
+                text_c = "#F2A900"
                 status_text = "■ Không đổi (Bằng giá tham chiếu)"
 
             st.markdown(f"""
                 <div style="background-color: {box_bg}; padding: 25px; border-radius: 8px; border: 2px solid {border_c}; text-align: center;">
-                    <p style="color: #CBD5E1; font-size: 13px; margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px;">XU HƯỚNG GIÁ ĐÓNG CỬA PHIÊN TIẾP THEO</p>
+                    <p style="color: #C9D1D9; font-size: 13px; margin-bottom: 5px; font-weight: 600;">XU HƯỚNG GIÁ ĐÓNG CỬA PHIÊN TIẾP THEO</p>
                     <h1 style="color: {text_c} !important; font-size: 46px !important; font-weight: 800; margin: 0; padding: 5px 0;">${prediction:.2f}</h1>
-                    <p style="color: {text_c} !important; font-size: 18px; margin: 5px 0 0 0; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                    <p style="color: {text_c} !important; font-size: 18px; margin: 5px 0 0 0; font-weight: 700; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
                         {status_text}
                     </p>
                 </div>
             """, unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
         else:
-            st.warning("Hệ thống đang chờ. Hãy bấm nút 'Thực hiện tính toán dự báo giá' bên trái.")
+            st.warning("Hệ thống đang chờ. Hãy bấm nút 'Bắt đầu dự đoán giá' bên trái để hiển thị kết quả xu hướng.")
             st.markdown("---")
             
-        st.markdown('<p style="font-weight:600; color:#94A3B8; margin-bottom:12px;">Độ tin cậy thuật toán (Dữ liệu kiểm thử hiện tại):</p>', unsafe_allow_html=True)
+        st.markdown('<p style="font-weight:600; color:#8B949E; margin-bottom:12px;">Độ tin cậy của mô hình (Mẫu kiểm thử):</p>', unsafe_allow_html=True)
         m_col1, m_col2, m_col3 = st.columns(3)
-        m_col1.metric("R² Score", f"{metrics['R2']:.4f}")
-        m_col2.metric("MAE (Sai số)", f"{metrics['MAE']:.4f}")
+        m_col1.metric("R² Score (Độ khớp)", f"{metrics['R2']:.4f}")
+        m_col2.metric("MAE (Sai số tuyệt đối)", f"{metrics['MAE']:.4f}")
         m_col3.metric("MSE", f"{metrics['MSE']:.4f}")
 
-# --- TAB 2: ĐỒ THỊ LÀM SÁNG ĐƯỜNG LƯỚI GRIDLINE ---
+# --- TAB 2: ĐỒ THỊ PHÂN TÍCH (ĐÃ SỬA CHỮ VÀ LÀM DỊU MÀU) ---
 with tab2:
-    st.markdown('<h3 style="color:#00E676; margin-bottom:20px; font-size:18px; font-weight:bold;">📊 ĐỒ THỊ PHÂN TÍCH KỸ THUẬT VÀ THUẬT TOÁN</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color:#26A69A; margin-bottom:20px; font-size:18px; font-weight:bold;">📊 ĐỒ THỊ PHÂN TÍCH KỸ THUẬT VÀ THUẬT TOÁN</h3>', unsafe_allow_html=True)
     
-    # --- ĐỂ KHÔNG BỊ NUỐT ĐƯỜNG CHỈ: Sửa template thành dark và làm sáng gridcolor ---
+    # Cấu hình giao diện biểu đồ: Tăng độ sáng tiêu đề lên #FFFFFF và làm sáng rõ lưới dóng trục
     chart_layout_config = dict(
         template="plotly_dark",
-        paper_bgcolor='rgba(15, 23, 42, 0.6)', 
-        plot_bgcolor='#0F172A',
-        font=dict(color='#E2E8F0'),
-        # Tăng cường độ tương phản đường chỉ bằng cách đổi màu grid thành xám sáng #334155
-        xaxis=dict(gridcolor='#334155', linecolor='#475569', title_font=dict(color='#94A3B8')),
-        yaxis=dict(gridcolor='#334155', linecolor='#475569', title_font=dict(color='#94A3B8'))
+        paper_bgcolor='rgba(13, 17, 23, 0.7)', 
+        plot_bgcolor='#0D1117',
+        font=dict(color='#C9D1D9'),
+        title_font=dict(color='#FFFFFF', size=16, family='Segoe UI', weight='bold'), # SỬA LỖI MẤT CHỮ TIÊU ĐỀ
+        xaxis=dict(gridcolor='#30363D', showgrid=True, linecolor='#30363D', title_font=dict(color='#8B949E')),
+        yaxis=dict(gridcolor='#30363D', showgrid=True, linecolor='#30363D', title_font=dict(color='#8B949E'))
     )
 
-    # Biểu đồ 1: Biến động giá
+    # Biểu đồ 1: Biến động giá Line màu Xanh tăng - Đỏ giảm kịch tính
     fig1 = object_graph.Figure()
     fig1.add_trace(object_graph.Scatter(x=filtered_df['date'], y=filtered_df['close'], name='Giá đóng cửa (Close)', line=dict(color='#00E676', width=2)))
-    fig1.add_trace(object_graph.Scatter(x=filtered_df['date'], y=filtered_df['open'], name='Giá mở cửa (Open)', line=dict(color='#EAB308', width=1.5, dash='dot')))
-    fig1.update_layout(title=f"Biểu đồ 1: Lịch sử Biến động Giá cổ phiếu {selected_ticker}", hovermode="x unified", **chart_layout_config)
+    fig1.add_trace(object_graph.Scatter(x=filtered_df['date'], y=filtered_df['open'], name='Giá mở cửa (Open)', line=dict(color='#FF1744', width=1.5, dash='dot')))
+    fig1.update_layout(title="Biểu đồ 1: Lịch sử Biến động Giá cổ phiếu (Xanh tăng / Đỏ giảm)", hovermode="x unified", **chart_layout_config)
     st.plotly_chart(fig1, use_container_width=True)
     
-    # Biểu đồ 2: Đặc trưng quan trọng (Phối màu: Trần xanh lam, tăng xanh lá, sàn tím)
+    # Biểu đồ 2: Đặc trưng quan trọng
     fig2 = px.bar(
         importance_df, x='Importance', y='Feature', orientation='h',
         title="Biểu đồ 2: Mức độ quan trọng của các đặc trưng đầu vào",
         labels={'Importance': 'Độ quan trọng', 'Feature': 'Đặc trưng'},
-        color='Importance', color_continuous_scale=['#9c27b0', '#FF1744', '#EAB308', '#00E676', '#00e5ff']
+        color='Importance', color_continuous_scale=['#EF5350', '#F2A900', '#26A69A']
     )
     fig2.update_layout(coloraxis_showscale=False, **chart_layout_config)
     st.plotly_chart(fig2, use_container_width=True)
     
-    # Biểu đồ 3: So sánh Thực tế vs Dự đoán (Đường dự đoán nét đứt rõ nét trên nền lưới sáng)
+    # Biểu đồ 3: So sánh Thực tế vs Dự đoán
     fig3 = object_graph.Figure()
     display_length = min(100, len(y_test))
     y_test_plot = y_test.values[-display_length:]
@@ -294,32 +285,35 @@ with tab2:
     fig3.update_layout(title=f"Biểu đồ 3: So sánh Giá trị Thực tế vs Dự đoán ({display_length} phiên cuối)", **chart_layout_config)
     st.plotly_chart(fig3, use_container_width=True)
     
-    # Biểu đồ 4: Khối lượng giao dịch tương quan
+    # Biểu đồ 4: ĐỔI MÀU NHẠT DỊU MẮT, KHÔNG CHÓI (Sử dụng bảng màu Cividis nhẹ nhàng)
     fig4 = px.scatter(
         filtered_df, x='volume', y='close', color='high',
         title="Biểu đồ 4: Mối tương quan giữa Khối lượng giao dịch và Giá đóng cửa",
         labels={'volume': 'Khối lượng khớp', 'close': 'Giá khớp', 'high': 'Giá cao nhất'},
-        color_continuous_scale='Bluered'
+        color_continuous_scale='Cividis' # Đổi sang hệ màu Cividis nhạt, trung tính và vô cùng dễ nhìn
     )
     fig4.update_layout(**chart_layout_config)
     st.plotly_chart(fig4, use_container_width=True)
     
-    # Biểu đồ 5: Biên độ dao động hình cột màu sắc Tím Huế đặc trưng sàn
+    # Biểu đồ 5: THÊM DẤU GẠCH XUỐNG (GRIDLINES DỌC) ĐỂ DỄ NHÌN DÓNG TRỤC
     filtered_df['Price_Range'] = filtered_df['high'] - filtered_df['low']
     fig5 = px.histogram(
         filtered_df, x='Price_Range', 
         title="Biểu đồ 5: Phân phối Biên độ dao động giá trong ngày (High - Low)",
         labels={'Price_Range': 'Biên độ dao động (USD)'},
-        color_discrete_sequence=['#9c27b0'], nbins=50
+        color_discrete_sequence=['#8884d8'], nbins=50
     )
     fig5.update_layout(yaxis_title="Tần suất xuất hiện", **chart_layout_config)
+    # Ép thuộc tính hiển thị đường lưới dọc thật rõ nét
+    fig5.update_xaxes(showgrid=True, gridcolor='#30363D', gridwidth=1)
     st.plotly_chart(fig5, use_container_width=True)
 
-# --- TAB 3: DỮ LIỆU SÁNG RÕ KHÔNG BỊ KHUẤT CHỮ ---
+# --- TAB 3: HIỂN THỊ DỮ LIỆU SÁNG RÕ 100% ---
 with tab3:
-    st.markdown(f'<h3 style="color:#EAB308; font-weight:bold;">📋 10 DÒNG DỮ LIỆU ĐẦU TIÊN CỦA KHOẢNG THỜI GIAN ĐÃ CHỌN ({selected_ticker})</h3>', unsafe_allow_html=True)
-    # Hiển thị trực tiếp Dataframe rõ ràng nhờ có tùy biến CSS cục bộ bảng ở phần trên đầu file
+    st.markdown(f'<h3 style="color:#F2A900; font-weight:bold;">📋 10 DÒNG DỮ LIỆU ĐẦU TIÊN CỦA KHOẢNG THỜI GIAN ĐÃ CHỌN ({selected_ticker})</h3>', unsafe_allow_html=True)
+    
+    # Đã giải quyết triệt để lỗi mất dữ liệu: Streamlit tự động áp dụng Darkmode sáng rõ chữ trắng nền đen mờ
     st.dataframe(filtered_df.head(10), use_container_width=True)
     
-    st.markdown('<h3 style="color:#EAB308; margin-top:30px; font-weight:bold;">📊 Thống kê mô tả tổng quan trong khoảng thời gian này</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color:#F2A900; margin-top:30px; font-weight:bold;">📊 Thống kê mô tả tổng quan trong khoảng thời gian này</h3>', unsafe_allow_html=True)
     st.dataframe(filtered_df.describe(), use_container_width=True)
