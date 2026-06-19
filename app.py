@@ -74,7 +74,7 @@ except Exception:
     st.error("Không tìm thấy tệp 'all_stocks_5yr.csv'. Vui lòng đặt tệp dữ liệu cùng cấp với mã nguồn ứng dụng.")
     st.stop()
 
-# --- CSS ĐỒNG BỘ NỀN VÀ KHẮC PHỤC LỖI HIỂN THỊ DỮ LIỆU BẢNG ---
+# --- CSS ĐỒNG BỘ NỀN VÀ KHẮC PHỤC LỖI HIỂN THỊ Ô NHẬP LIỆU ---
 st.markdown("""
     <style>
         .stApp {
@@ -120,10 +120,17 @@ st.markdown("""
             border-bottom: 3px solid #26A69A !important;
         }
         
+        /* ĐÃ SỬA: CSS chuẩn hóa cho các ô input giúp gõ chữ bằng tay mượt mà */
         input {
             color: #FFFFFF !important;
             background-color: #0D1117 !important;
             border: 1px solid #30363D !important;
+        }
+        input:focus {
+            background-color: #161B22 !important;
+            color: #FFFFFF !important;
+            border-color: #26A69A !important;
+            caret-color: #FFFFFF !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -186,48 +193,43 @@ with tab1:
         close_val = st.number_input("Giá đóng cửa phiên trước (close)", value=float(latest_row['close']), format="%.2f")
         volume_val = st.number_input("Khối lượng giao dịch phiên trước (volume)", value=int(latest_row['volume']), step=1000)
         
-        predict_clicked = st.button("🚀 Bắt đầu dự đoán giá", use_container_width=True)
-        
     with col_output:
         st.markdown('<div style="background-color:#161B22; padding:15px; border-radius:6px; border-left: 5px solid #26A69A;">'
                     '<h3 style="margin-top:0; color:#26A69A; font-size:16px; font-weight:bold;">📤 KẾT QUẢ ĐẦU RA TỪ MÔ HÌNH DỰ BÁO</h3>'
                     '</div><br>', unsafe_allow_html=True)
         
-        if predict_clicked:
-            input_features = np.array([[open_val, high_val, low_val, close_val, volume_val]])
-            prediction = rf_model.predict(input_features)[0]
-            price_diff = prediction - close_val
-            pct_diff = (price_diff / close_val) * 100
-            
-            if price_diff > 0:
-                box_bg = "rgba(38, 166, 154, 0.15)"
-                border_c = "#26A69A"
-                text_c = "#00E676"  
-                status_text = f"▲ Tăng {price_diff:+.2f} ({pct_diff:+.2f}%)"
-            elif price_diff < 0:
-                box_bg = "rgba(239, 83, 80, 0.15)"
-                border_c = "#EF5350"
-                text_c = "#FF1744"  
-                status_text = f"▼ Giảm {price_diff:+.2f} ({pct_diff:+.2f}%)"
-            else:
-                box_bg = "rgba(242, 169, 0, 0.1)"
-                border_c = "#F2A900"
-                text_c = "#F2A900"
-                status_text = "■ Không đổi (Bằng giá tham chiếu)"
-
-            st.markdown(f"""
-                <div style="background-color: {box_bg}; padding: 25px; border-radius: 8px; border: 2px solid {border_c}; text-align: center;">
-                    <p style="color: #C9D1D9; font-size: 13px; margin-bottom: 5px; font-weight: 600;">XU HƯỚNG GIÁ ĐÓNG CỬA PHIÊN TIẾP THEO</p>
-                    <h1 style="color: {text_c} !important; font-size: 46px !important; font-weight: 800; margin: 0; padding: 5px 0;">${prediction:.2f}</h1>
-                    <p style="color: {text_c} !important; font-size: 18px; margin: 5px 0 0 0; font-weight: 700; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
-                        {status_text}
-                    </p>
-                </div>
-            """, unsafe_allow_html=True)
-            st.markdown("<br>", unsafe_allow_html=True)
+        # ĐÃ SỬA: Chạy mô hình dự báo trực tiếp thời gian thực khi bất kì ô input nào thay đổi
+        input_features = np.array([[open_val, high_val, low_val, close_val, volume_val]])
+        prediction = rf_model.predict(input_features)[0]
+        price_diff = prediction - close_val
+        pct_diff = (price_diff / close_val) * 100
+        
+        if price_diff > 0:
+            box_bg = "rgba(38, 166, 154, 0.15)"
+            border_c = "#26A69A"
+            text_c = "#00E676"  
+            status_text = f"▲ Tăng {price_diff:+.2f} ({pct_diff:+.2f}%)"
+        elif price_diff < 0:
+            box_bg = "rgba(239, 83, 80, 0.15)"
+            border_c = "#EF5350"
+            text_c = "#FF1744"  
+            status_text = f"▼ Giảm {price_diff:+.2f} ({pct_diff:+.2f}%)"
         else:
-            st.warning("Hệ thống đang chờ. Hãy bấm nút 'Bắt đầu dự đoán giá' bên trái để hiển thị kết quả xu hướng.")
-            st.markdown("---")
+            box_bg = "rgba(242, 169, 0, 0.1)"
+            border_c = "#F2A900"
+            text_c = "#F2A900"
+            status_text = "■ Không đổi (Bằng giá tham chiếu)"
+
+        st.markdown(f"""
+            <div style="background-color: {box_bg}; padding: 25px; border-radius: 8px; border: 2px solid {border_c}; text-align: center;">
+                <p style="color: #C9D1D9; font-size: 13px; margin-bottom: 5px; font-weight: 600;">XU HƯỚNG GIÁ ĐÓNG CỬA PHIÊN TIẾP THEO</p>
+                <h1 style="color: {text_c} !important; font-size: 46px !important; font-weight: 800; margin: 0; padding: 5px 0;">${prediction:.2f}</h1>
+                <p style="color: {text_c} !important; font-size: 18px; margin: 5px 0 0 0; font-weight: 700; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                    {status_text}
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
             
         st.markdown('<p style="font-weight:600; color:#8B949E; margin-bottom:12px;">Độ tin cậy của mô hình (Mẫu kiểm thử):</p>', unsafe_allow_html=True)
         m_col1, m_col2, m_col3 = st.columns(3)
